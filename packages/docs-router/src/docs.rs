@@ -93,6 +93,39 @@ fn CodeBlock(contents: String, name: Option<String>) -> Element {
     }
 }
 
+#[component]
+fn MermaidBlock(chart: &'static str) -> Element {
+    rsx! {
+        div {
+            document::Link { rel: "stylesheet", href: asset!("assets/mermaid_block.css") }
+            div { class: "diagram-container", style: "height: 600px;",
+                div { class: "diagram-wrapper", id: "diagram-wrapper",
+                    pre { class: "mermaid", dangerous_inner_html: "{chart}" }
+                    script { r#type: "module",
+                        r#"
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/+esm';
+mermaid.initialize({{ startOnLoad: false }});
+const mermaidElements = document.querySelectorAll('.mermaid');
+mermaidElements.forEach((element, index) => {{
+    element.textContent = element.textContent.trim();
+}});
+mermaid.run().catch(error => {{
+    console.error('Mermaid rendering error:', error);
+}});
+                    "#
+                    }
+                }
+                div { class: "zoom-controls",
+                    button { class: "zoom-in", "+" }
+                    button { class: "zoom-reset", "Reset" }
+                    button { class: "zoom-out", "-" }
+                    div { class: "zoom-level", "100%" }
+                }
+            }
+        }
+    }
+}
+
 pub(crate) static Copy: Component<()> = |_| {
     rsx!(
         svg {
